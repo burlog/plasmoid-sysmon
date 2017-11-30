@@ -18,9 +18,14 @@
 
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
+import org.kde.plasma.components 2.0 as PlasmaComponents
+
+import "../code/utils.js" as Utils
 
 Item {
-    property alias colors: canvas.colors
+    id: circular_monitor
+
+    property var orig_values
     property alias values: canvas.values
 
     anchors {
@@ -43,7 +48,6 @@ Item {
         property real alpha: 1.0
 
         property var values
-        property var colors
 
         // This fixes edge bleeding
         readonly property double filler: 0.01
@@ -66,7 +70,7 @@ Item {
             // draw the sectors
             for (var i = 0; i < values.length; i++) {
                 var radians = values[i] * 2 * Math.PI
-                ctx.fillStyle = colors[i]
+                ctx.fillStyle = plasmoid.configuration.colors[i]
                 ctx.beginPath()
                 ctx.arc(width / 2, height / 2, min / 2.03, currentRadian, currentRadian + radians + filler, false)
                 ctx.arc(width / 2, height / 2, min / 3.5, currentRadian + radians + filler, currentRadian, true)
@@ -88,6 +92,23 @@ Item {
             ctx.stroke()
             ctx.restore()
         }
+    }
+
+    // the label if requested
+    PlasmaComponents.Label {
+        id: label
+        width: parent.width - (Math.min(canvas.height, canvas.width) / 2.03 - Math.min(canvas.height, canvas.width) / 3.5) * 2
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
+
+        // tells the label to be centered in parent (in the centre of CircularMonitor)
+        anchors {
+            verticalCenter: parent.verticalCenter
+            horizontalCenter: parent.horizontalCenter
+        }
+
+        // the value
+        text: Utils.get_label(plasmoid.configuration, orig_values)
     }
 }
 

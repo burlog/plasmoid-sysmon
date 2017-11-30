@@ -29,24 +29,22 @@ Item {
 
     property var cfg_names: []
     property var cfg_colors: []
-    property var cfg_guessed_max_values: []
     property alias cfg_last_filter: filter.text
 
     onConfigurationChanged: {
         cfg_colors.length = cfg_names.length
+        var sys_name = "sys." + model.name
         if (model.checked) {
-            var i = cfg_names.indexOf(model.name)
+            var i = cfg_names.indexOf(sys_name)
             if (i == -1) {
-                cfg_names.push(model.name)
+                cfg_names.push(sys_name)
                 cfg_colors.push(model.color)
-                cfg_guessed_max_values.push(String(0))
             } else cfg_colors[i] = model.color
         } else {
-            var i = cfg_names.indexOf(model.name)
+            var i = cfg_names.indexOf(sys_name)
             if (i != -1) {
                 cfg_names.splice(i, 1)
                 cfg_colors.splice(i, 1)
-                cfg_guessed_max_values.splice(i, 1)
             }
         }
     }
@@ -56,32 +54,25 @@ Item {
         engine: "systemmonitor"
     }
 
-    function name_index(name) {
-        for (var i = 0; i < cfg_names.length; ++i)
-            if (cfg_names[i] == name)
-                return i
-        return -1;
-    }
-
     Component.onCompleted: {
         cfg_names = plasmoid.configuration.names.slice()
         cfg_colors = plasmoid.configuration.colors.slice()
-        cfg_guessed_max_values = plasmoid.configuration.guessed_max_values.slice()
         var tmp_last_filter = cfg_last_filter
         cfg_last_filter = ""
 
         for (var i in systemmonitor.sources) {
-            if (systemmonitor.sources[i].match(/[^\x{0000}-\x{007F}]/)) continue
-            var j = name_index(systemmonitor.sources[i])
+            var name = systemmonitor.sources[i]
+            if (name.match(/[^\x{0000}-\x{007F}]/)) continue
+            var j = cfg_names.indexOf("sys." + name)
             if (j == -1) {
                 sysmon_sources_model.append({
-                    "name": systemmonitor.sources[i],
+                    "name": name,
                     "color": plasmoid.configuration.default_color,
                     "checked": false
                 });
             } else {
                 sysmon_sources_model.append({
-                    "name": systemmonitor.sources[i],
+                    "name": name,
                     "color": cfg_colors[j],
                     "checked": true
                 });

@@ -25,9 +25,19 @@ ConfigModel {
          source: "Config.qml"
     }
     ConfigCategory {
-         name: i18n("Data Sources")
+         name: i18n("System Monitor Data Source")
          icon: "utilities-system-monitor"
-         source: "DataSourcesConfig.qml"
+         source: "SystemMonitorDataSourceConfig.qml"
+    }
+    ConfigCategory {
+         name: i18n("Executabale Data Source")
+         icon: "application-x-executable"
+         source: "ExecutableDataSourceConfig.qml"
+    }
+    ConfigCategory {
+         name: i18n("Examples")
+         icon: "user-desktop"
+         source: "ExampleConfig.qml"
     }
 }
 

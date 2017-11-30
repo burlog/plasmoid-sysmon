@@ -22,6 +22,8 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
+import "../code/utils.js" as Utils
+
 Item {
     id: main
 
@@ -36,50 +38,121 @@ Item {
         connectedSources: ["org.kde.ksysguard.desktop"]
     }
 
-    // the source of data about cpu
-    PlasmaCore.DataSource {
-        id: systemmonitor
-        engine: "systemmonitor"
+    // the data arrays
+    property var values: []
+    property var orig_values: []
 
-        // the data arrays
-        property var values: []
-        property var orig_values: []
-        property var colors: []
+    // execute source
+    PlasmaCore.DataSource {
+        id: execute_ds
+        engine: "executable"
+
+        property var tick
 
         // what data is requested from the systemmonitor data source
-        connectedSources: plasmoid.configuration.names
+        connectedSources: {
+            var sources = []
+            for (var i = 0; i < plasmoid.configuration.names.length; ++i) {
+                var exe_name = plasmoid.configuration.names[i]
+                if (exe_name.substring(0, 4) == "exe.")
+                    sources.push(exe_name.substring(4))
+            }
+            return sources
+        }
+
+        // flush all values
+        onConnectedSourcesChanged: {
+            values = []
+            orig_values = []
+            plasmoid.configuration.guessed_max_value = 0.0
+        }
 
         // called when new data is available
         onNewData: {
+            var exe_source_name = "exe." + sourceName
             for (var i = 0; i < plasmoid.configuration.names.length; ++i) {
-                if (plasmoid.configuration.names[i] == sourceName) {
-                    while (i >= values.length) values.push(0)
-                    values[i] = normalize(data.value, i)
+                if (plasmoid.configuration.names[i] == exe_source_name) {
                     while (i >= orig_values.length) orig_values.push(0)
-                    orig_values[i] = Number(data.value)
-                    while (i >= colors.length) colors.push(plasmoid.configuration.default_color)
-                    colors[i] = plasmoid.configuration.colors[i]
+                    orig_values[i] = Number(data.stdout)
+                    while (i >= values.length) values.push(0)
+                    values[i] = normalize(orig_values, data.stdout, i)
                 }
             }
-            valuesChanged()
-            orig_valuesChanged()
+            var current_tick = Math.floor(Date.now() / 1000)
+            if (tick != current_tick) {
+                valuesChanged()
+                orig_valuesChanged()
+                tick = current_tick
+            }
         }
 
         // the update interval
         interval: plasmoid.configuration.update_interval * 1000
     }
 
-    function normalize(value, i) {
+    // the source of data about cpu
+    PlasmaCore.DataSource {
+        id: systemmonitor
+        engine: "systemmonitor"
+
+        property var tick
+
+        // what data is requested from the systemmonitor data source
+        connectedSources: {
+            var sources = []
+            for (var i = 0; i < plasmoid.configuration.names.length; ++i) {
+                var sys_name = plasmoid.configuration.names[i]
+                if (sys_name.substring(0, 4) == "sys.")
+                    sources.push(sys_name.substring(4))
+            }
+            return sources
+        }
+
+        // flush all values
+        onConnectedSourcesChanged: {
+            values = []
+            orig_values = []
+            plasmoid.configuration.guessed_max_value = 0.0
+        }
+
+        // called when new data is available
+        onNewData: {
+            var sys_source_name = "sys." + sourceName
+            for (var i = 0; i < plasmoid.configuration.names.length; ++i) {
+                if (plasmoid.configuration.names[i] == sys_source_name) {
+                    while (i >= orig_values.length) orig_values.push(0)
+                    orig_values[i] = Number(data.value)
+                    while (i >= values.length) values.push(0)
+                    values[i] = normalize(orig_values, data.value, i)
+                }
+            }
+            var current_tick = Math.floor(Date.now() / 1000)
+            if (tick != current_tick) {
+                valuesChanged()
+                orig_valuesChanged()
+                tick = current_tick
+            }
+        }
+
+        // the update interval
+        interval: plasmoid.configuration.update_interval * 1000
+    }
+
+    function sum(values) {
+        var values_sum = 0
+        for (var i = 0; i < values.length; ++i) {
+            values_sum += values[i]
+        }
+        return values_sum
+    }
+
+    function normalize(orig_values, value, i) {
         var max_value = plasmoid.configuration.max_value
         if (max_value == 0.0) {
-            if (value > Number(plasmoid.configuration.guessed_max_values[i])) {
-                var new_guessed_max_values = plasmoid.configuration.guessed_max_values.slice()
-                new_guessed_max_values[i] = String(value)
-                plasmoid.configuration.guessed_max_values = new_guessed_max_values
-            }
-            for (var j = 0; j < plasmoid.configuration.guessed_max_values.length; ++j)
-                max_value += Number(plasmoid.configuration.guessed_max_values[j])
-            max_value *= 1.01
+            var values_sum = sum(orig_values)
+            if (values_sum > Number(plasmoid.configuration.guessed_max_value))
+                plasmoid.configuration.guessed_max_value = values_sum
+            max_value = plasmoid.configuration.guessed_max_value * 1.2
         }
         value = value / max_value
         return isNaN(value)? 0: Math.min(value, 1)
@@ -108,13 +181,16 @@ Item {
                 text: ""
 
                 Connections {
-                    target: systemmonitor
+                    target: main
                     onOrig_valuesChanged: {
                         if (tooltip_main_item.visible) {
                             var result = ""
                             for (var i = 0; i < plasmoid.configuration.names.length; ++i) {
                                 if (i) result += "\n"
-                                result += i18n("%1: %2", plasmoid.configuration.names[i], Math.round(systemmonitor.orig_values[i]))
+                                var value = Utils.format_number(plasmoid.configuration, main.orig_values[i])
+                                var name = plasmoid.configuration.labels[i]
+                                if (!name.length) name = plasmoid.configuration.names[i].substring(4)
+                                result += i18n("%1: %2", name, value)
                             }
                             tooltip_text.text = result
                         }
@@ -128,38 +204,16 @@ Item {
     ColumnLayout {
         id: view
 
-        // tells the CircularMonitor to fill whole parent space
+        // tells the monitor to fill whole parent space
         anchors {
             fill: main
         }
 
-        CircularMonitor {
-            // hopefuly adjust label to center of circles
-            anchors {
-                topMargin: 5
-            }
-
-            // use configured colors
-            colors: systemmonitor.colors
-            // map the values to CircularMonitor values
-            values: systemmonitor.values
-        }
-
-        // the label if requested
-        PlasmaComponents.Label {
-            id: label
-
-            // use small caps for label
-            font.capitalization: Font.SmallCaps
-
-            // tells the label to be centered in parent (in the centre of CircularMonitor)
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
-            }
-
-            // the value
-            text: plasmoid.configuration.label
+        ConditionallyLoadedMonitor {
+            // map the values to monitor values
+            values: main.values
+            // map the original values to monitor values
+            orig_values: main.orig_values
         }
     }
 }

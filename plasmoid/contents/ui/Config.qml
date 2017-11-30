@@ -26,8 +26,11 @@ Item {
     id: config
 
     property alias cfg_label: label_text_field.text
+    property alias cfg_monitor_type: type_combo.currentIndex
     property alias cfg_update_interval: update_interval_spinbox.value
     property alias cfg_max_value: max_value_spinbox.value
+    property alias cfg_multiplier: multiplier_spinbox.value
+    property alias cfg_use_value_as_label: use_value_as_label_checkbox.checked
     property string cfg_default_color
 
     GridLayout {
@@ -44,7 +47,33 @@ Item {
 
         QtControls.TextField {
             id: label_text_field
-            font.capitalization: Font.SmallCaps
+            onTextChanged: {
+                cfg_use_value_as_label = false
+            }
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
+        }
+
+        QtControls.Label {
+            text: i18n("Use Value as Label:")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        QtControls.CheckBox {
+            id: use_value_as_label_checkbox
+            onCheckedChanged: {
+                label_text_field.enabled = !checked
+            }
+        }
+
+        QtControls.Label {
+            text: i18n("Type:")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        QtControls.ComboBox {
+            id: type_combo
+            model: ["circular", "bar", "plotter", "number"]
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
         }
 
         QtControls.Label {
@@ -58,6 +87,7 @@ Item {
             onColorSelected: {
                 cfg_default_color = chosen_color.toString()
             }
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
         }
 
         QtControls.Label {
@@ -70,6 +100,20 @@ Item {
             minimumValue: 0.0
             maximumValue: Number.MAX_VALUE
             stepSize: 1.0
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
+        }
+
+        QtControls.Label {
+            text: i18n("Value Multiplier:")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        QtControls.SpinBox {
+            id: multiplier_spinbox
+            decimals: 6
+            minimumValue: Number.MIN_VALUE
+            maximumValue: Number.MAX_VALUE
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
         }
 
         QtControls.Label {
@@ -84,6 +128,7 @@ Item {
             minimumValue: 0.1
             maximumValue: Number.MAX_VALUE
             stepSize: 0.1
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
         }
     }
 }
