@@ -78,11 +78,13 @@ Item {
                     values[i] = normalize(orig_values, data.stdout, i)
                 }
             }
-            var current_tick = Math.floor(Date.now() / 1000)
-            if (tick != current_tick) {
+            var interval = plasmoid.configuration.update_interval * 1000
+            var current_tick = Date.now()
+            var time_spent = current_tick - tick
+            if (time_spent > interval ) {
                 valuesChanged()
                 orig_valuesChanged()
-                tick = current_tick
+                tick = tick + (Math.floor(time_spent / interval) * interval)
             }
         }
 
@@ -126,11 +128,13 @@ Item {
                     values[i] = normalize(orig_values, data.value, i)
                 }
             }
-            var current_tick = Math.floor(Date.now() / 1000)
-            if (tick != current_tick) {
+            var interval = plasmoid.configuration.update_interval * 1000
+            var current_tick = Date.now()
+            var time_spent = current_tick - tick
+            if (time_spent > interval ) {
                 valuesChanged()
                 orig_valuesChanged()
-                tick = current_tick
+                tick = tick + (Math.floor(time_spent / interval) * interval)
             }
         }
 
