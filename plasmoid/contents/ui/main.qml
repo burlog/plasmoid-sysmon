@@ -47,7 +47,7 @@ Item {
         id: execute_ds
         engine: "executable"
 
-        property var tick
+        property var tick: 0
 
         // what data is requested from the systemmonitor data source
         connectedSources: {
@@ -78,11 +78,12 @@ Item {
                     values[i] = normalize(orig_values, data.stdout, i)
                 }
             }
-            var current_tick = Math.floor(Date.now() / 1000)
-            if (tick != current_tick) {
+            var current_tick = Date.now()
+            var time_spent = current_tick - tick
+            if (time_spent > interval ) {
                 valuesChanged()
                 orig_valuesChanged()
-                tick = current_tick
+                tick = tick + (Math.floor(time_spent / interval) * interval)
             }
         }
 
@@ -95,7 +96,7 @@ Item {
         id: systemmonitor
         engine: "systemmonitor"
 
-        property var tick
+        property var tick: 0
 
         // what data is requested from the systemmonitor data source
         connectedSources: {
@@ -126,11 +127,12 @@ Item {
                     values[i] = normalize(orig_values, data.value, i)
                 }
             }
-            var current_tick = Math.floor(Date.now() / 1000)
-            if (tick != current_tick) {
+            var current_tick = Date.now()
+            var time_spent = current_tick - tick
+            if (time_spent > interval ) {
                 valuesChanged()
                 orig_valuesChanged()
-                tick = current_tick
+                tick = tick + (Math.floor(time_spent / interval) * interval)
             }
         }
 
