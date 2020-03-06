@@ -80,6 +80,10 @@ Item {
                 horizontalCenter: parent.horizontalCenter
             }
 
+            font.capitalization: plasmoid.configuration.use_smallcaps
+                ? Font.SmallCaps
+                : Font.MixedCase
+
             text: Utils.get_label(plasmoid.configuration, orig_values)
         }
     }

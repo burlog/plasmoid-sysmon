@@ -111,7 +111,7 @@ Item {
                 title: i18n("Show")
                 width: theme.mSize(theme.defaultFont).width * 5
 
-                delegate: Item {
+                delegate: Row {
                     anchors.fill: parent
 
                     ColorPicker {
@@ -119,7 +119,6 @@ Item {
                         activeFocusOnTab: false
                         anchors {
                             horizontalCenter: parent.horizontalCenter
-                            verticalCenter: parent.verticalCenter
                         }
 
                         chosen_color: model

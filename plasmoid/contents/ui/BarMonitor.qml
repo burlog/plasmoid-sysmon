@@ -18,6 +18,7 @@
 
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
+import QtGraphicalEffects 1.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
 import "../code/utils.js" as Utils
@@ -60,20 +61,44 @@ Item {
                 id: bar_repeater
                 model: values.length
 
-                Rectangle {
-                    color: plasmoid.configuration.colors[index]
-                    height: (bar_border.height - (bar_border.border.width * 2)) * bar_monitor.values[index]
-                    width: bar_border.width - (bar_border.border.width * 2)
-                    z: -1
-                    anchors {
-                        bottom: index == 0
-                            ? bar_border.bottom
-                            : bar_repeater.itemAt(index - 1).top
-                        bottomMargin: index == 0
-                            ? bar_border.border.width
-                            : 0
+                Item {
+                    Loader {
+                        id: rectangle_loader
+                        active: false //!plasmoid.configuration.use_color_gradients
+                        sourceComponent: Rectangle {
+                            color: plasmoid.configuration.colors[index]
+                            height: (bar_border.height - (bar_border.border.width * 2)) * bar_monitor.values[index]
+                            width: bar_border.width - (bar_border.border.width * 2)
+                            z: -1
+                            // anchors {
+                            //     bottom: index == 0
+                            //         ? bar_border.bottom
+                            //         : bar_repeater.itemAt(index - 1).top
+                            //     bottomMargin: index == 0
+                            //         ? bar_border.border.width
+                            //         : 0
+                            // }
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        print("EEEEEEEE")
+                        if (!plasmoid.configuration.use_color_gradients)
+                            rectangle_loader.active = true
                     }
                 }
+
+                // Loader {
+                //     active: plasmoid.configuration.use_color_gradients
+                //     sourceComponent: LinearGradient {
+                //     }
+                //     Component.onCompleted: {
+                //         print("LG", status, active, plasmoid.configuration.use_color_gradients)
+                //     }
+                //     onLoaded: {
+                //         print("AA")
+                //     }
+                // }
             }
         }
 
@@ -95,6 +120,10 @@ Item {
                 top: bar_row.bottom
                 horizontalCenter: parent.horizontalCenter
             }
+
+            font.capitalization: plasmoid.configuration.use_smallcaps
+                ? Font.SmallCaps
+                : Font.MixedCase
 
             text: Utils.get_label(plasmoid.configuration, orig_values)
         }

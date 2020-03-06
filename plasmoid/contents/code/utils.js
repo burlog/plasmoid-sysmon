@@ -41,7 +41,7 @@ function format_number(conf, value) {
     for (var i = 0; i < value_units.length; ++i) {
         var value_unit = value_units[i]
         var fixed_value = value * conf.multiplier
-        if (fixed_value > value_unit.exp)
+        if (fixed_value >= value_unit.exp)
             return to_string(fixed_value / value_unit.exp) + value_unit.unit
     }
     return "0"

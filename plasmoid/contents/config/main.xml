@@ -9,6 +9,9 @@
 		<entry name="label" type="String">
 			<default></default>
 		</entry>
+		<entry name="use_smallcaps" type="Bool">
+			<default>false</default>
+		</entry>
 		<entry name="use_value_as_label" type="Bool">
 			<default>false</default>
 		</entry>
@@ -26,6 +29,12 @@
 		</entry>
 		<entry name="default_color" type="String">
 			<default>green</default>
+		</entry>
+		<entry name="use_color_gradients" type="Bool">
+			<default>false</default>
+		</entry>
+		<entry name="gradient_color" type="String">
+			<default>red</default>
 		</entry>
 	</group>
 
@@ -47,4 +56,3 @@
 		</entry>
 	</group>
 </kcfg>
-

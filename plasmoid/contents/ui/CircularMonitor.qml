@@ -67,10 +67,29 @@ Item {
             var currentRadian = Math.PI / 2
             var min = Math.min(height, width)
 
+            // prepare gradient
+            var gradient
+            if (plasmoid.configuration.use_color_gradients) {
+                gradient = ctx.createConicalGradient(width / 2, height / 2, (3 * Math.PI) / 2)
+                if (values.length == 1) {
+                    gradient.addColorStop(0, plasmoid.configuration.gradient_color)
+                    gradient.addColorStop(1, plasmoid.configuration.colors[0])
+                } else {
+                    var position = 1
+                    for (var i = 0; i < values.length; ++i) {
+                        var color = plasmoid.configuration.colors[i]
+                        gradient.addColorStop(Math.max(position, 0), color)
+                        position -= values[i]
+                    }
+                }
+            }
+
             // draw the sectors
-            for (var i = 0; i < values.length; i++) {
+            for (var i = 0; i < values.length; ++i) {
                 var radians = values[i] * 2 * Math.PI
-                ctx.fillStyle = plasmoid.configuration.colors[i]
+                ctx.fillStyle = gradient
+                    ? gradient
+                    : plasmoid.configuration.colors[i]
                 ctx.beginPath()
                 ctx.arc(width / 2, height / 2, min / 2.03, currentRadian, currentRadian + radians + filler, false)
                 ctx.arc(width / 2, height / 2, min / 3.5, currentRadian + radians + filler, currentRadian, true)
@@ -106,6 +125,10 @@ Item {
             verticalCenter: parent.verticalCenter
             horizontalCenter: parent.horizontalCenter
         }
+
+        font.capitalization: plasmoid.configuration.use_smallcaps
+            ? Font.SmallCaps
+            : Font.MixedCase
 
         // the value
         text: Utils.get_label(plasmoid.configuration, orig_values)

@@ -18,7 +18,6 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.2 as QtControls
-
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
@@ -29,22 +28,26 @@ Item {
 
     property var cfg_names: []
     property var cfg_colors: []
+    property var cfg_labels: []
     property alias cfg_last_filter: filter.text
 
     onConfigurationChanged: {
         cfg_colors.length = cfg_names.length
+        cfg_labels.length = cfg_names.length
         var sys_name = "sys." + model.name
         if (model.checked) {
             var i = cfg_names.indexOf(sys_name)
             if (i == -1) {
                 cfg_names.push(sys_name)
                 cfg_colors.push(model.color)
+                cfg_labels.push("")
             } else cfg_colors[i] = model.color
         } else {
             var i = cfg_names.indexOf(sys_name)
             if (i != -1) {
                 cfg_names.splice(i, 1)
                 cfg_colors.splice(i, 1)
+                cfg_labels.splice(i, 1)
             }
         }
     }
@@ -57,6 +60,7 @@ Item {
     Component.onCompleted: {
         cfg_names = plasmoid.configuration.names.slice()
         cfg_colors = plasmoid.configuration.colors.slice()
+        cfg_labels = plasmoid.configuration.labels.slice()
         var tmp_last_filter = cfg_last_filter
         cfg_last_filter = ""
 
@@ -143,7 +147,7 @@ Item {
                 role: "selected"
 
                 title: i18n("Show")
-                width: hidden_checkbox.width + 32
+                width: hidden_checkbox.width * 3
 
                 delegate: RowLayout {
                     RowLayout {

@@ -26,12 +26,15 @@ Item {
     id: config
 
     property alias cfg_label: label_text_field.text
+    property alias cfg_use_smallcaps: use_smallcaps_checkbox.checked
     property alias cfg_monitor_type: type_combo.currentIndex
     property alias cfg_update_interval: update_interval_spinbox.value
     property alias cfg_max_value: max_value_spinbox.value
     property alias cfg_multiplier: multiplier_spinbox.value
     property alias cfg_use_value_as_label: use_value_as_label_checkbox.checked
+    property alias cfg_use_color_gradients: use_color_gradients_checkbox.checked
     property string cfg_default_color
+    property string cfg_gradinet_color
 
     GridLayout {
         id: layout
@@ -51,6 +54,15 @@ Item {
                 cfg_use_value_as_label = false
             }
             Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
+        }
+
+        QtControls.Label {
+            text: i18n("Use Smallcaps for Label:")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        QtControls.CheckBox {
+            id: use_smallcaps_checkbox
         }
 
         QtControls.Label {
@@ -77,20 +89,6 @@ Item {
         }
 
         QtControls.Label {
-            text: i18n("Default Color")
-            Layout.alignment: Qt.AlignRight
-        }
-
-        ColorPicker {
-            id: default_color_picker
-            chosen_color: plasmoid.configuration.default_color
-            onColorSelected: {
-                cfg_default_color = chosen_color.toString()
-            }
-            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
-        }
-
-        QtControls.Label {
             text: i18n("Forced Maximum Value:")
             Layout.alignment: Qt.AlignRight
         }
@@ -113,6 +111,47 @@ Item {
             decimals: 6
             minimumValue: Number.MIN_VALUE
             maximumValue: Number.MAX_VALUE
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
+        }
+
+        QtControls.Label {
+            text: i18n("Default Color")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        ColorPicker {
+            id: default_color_picker
+            chosen_color: plasmoid.configuration.default_color
+            onColorSelected: {
+                cfg_default_color = chosen_color.toString()
+            }
+            Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
+        }
+
+        QtControls.Label {
+            text: i18n("Allow color gradients")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        QtControls.CheckBox {
+            id: use_color_gradients_checkbox
+            onCheckedChanged: {
+                gradient_color_picker.enabled = checked
+            }
+        }
+        QtControls.Label {
+            text: i18n("Last Gradient Color")
+            Layout.alignment: Qt.AlignRight
+        }
+
+        ColorPicker {
+            id: gradient_color_picker
+            chosen_color: plasmoid.configuration.gradient_color
+            enabled: false
+            onColorSelected: {
+                cfg_gradient_color = chosen_color.toString()
+                use_color_gradients_checkbox.checked = true
+            }
             Layout.preferredWidth: 20 * theme.mSize(theme.defaultFont).width
         }
 

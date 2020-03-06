@@ -58,6 +58,8 @@ Item {
                 "labels": [""],
                 "colors": ["limegreen"],
                 "max_value": 100,
+                "use_color_gradients": true,
+                "gradient_color": "red",
                 "last_filter": "acpi/Thermal_Zone",
             }
         }, {
@@ -100,7 +102,7 @@ Item {
                 "names": ["exe.ping -nqc 1 8.8.8.8 -W 1 | cut -s -f 5 -d/"],
                 "labels": ["ping 8.8.8.8"],
                 "colors": ["limegreen"],
-                "update_interval": 2
+                "update_interval": 2,
             }
         }
     ]
