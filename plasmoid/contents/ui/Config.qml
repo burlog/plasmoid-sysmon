@@ -34,7 +34,7 @@ Item {
     property alias cfg_use_value_as_label: use_value_as_label_checkbox.checked
     property alias cfg_use_color_gradients: use_color_gradients_checkbox.checked
     property string cfg_default_color
-    property string cfg_gradinet_color
+    property string cfg_gradient_color
 
     GridLayout {
         id: layout
