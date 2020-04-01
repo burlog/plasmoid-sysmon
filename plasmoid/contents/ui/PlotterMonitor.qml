@@ -63,7 +63,6 @@ Item {
         id: label
 
         width: plotter.width
-        visible: Utils.is_label_visible(plasmoid.configuration)
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
 
