@@ -53,7 +53,10 @@ Item {
 
         horizontalGridLineCount: 0
 
-        autoRange: true
+        autoRange: plasmoid.configuration.max_value == 0.0
+
+	rangeMin: 0
+	rangeMax: 1
 
         dataSets: make_data_set()
     }
